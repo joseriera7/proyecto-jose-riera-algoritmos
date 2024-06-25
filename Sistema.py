@@ -269,7 +269,12 @@ class Sistema:
         entradas=[]
         for entrada in range(1,int(cantidad)+1):
              nro_entrada=random.randint(100000,999999)
+             while nro_entrada in entradas:
+                 nro_entrada=random.randint(100000,999999)
+                 
              entradas.append(nro_entrada)
+           
+
 
         print(f'''
               ENTRADA
@@ -392,24 +397,24 @@ class Sistema:
 
     def chequear_entradas(self):
         while True:
-         print("inicio")
          entrada_revisando=input("Por favor ingrese el numero de entrada a chequear: ").strip()
          while not entrada_revisando.isdigit() or int(entrada_revisando) not in range(100000,999999):
               print('Por favor ingrese un numero de entrada valido')
               entrada_revisando=input("Por favor ingrese el numero de entrada a chequear: ")
+         estatus=''
          for entrada in self.ticket_list:
               if int(entrada_revisando) == entrada.numero:
                 if entrada.chequeado==False:
-                   print('Bienvenido a su partido, que disfrute!')
+                   estatus='Bienvenido a su partido, que disfrute!'
                    entrada.chequeado=True
-                   break
+                   break          
                 else:
-                     print(f'Ya la entrada {entrada_revisando}  fue revisada, no puede pasar')
+                     estatus=(f'Ya la entrada {entrada_revisando}  fue revisada, no puede pasar')
+                     break
                      
               else:
-                   print(f'No hay entrada numero: {entrada_revisando}')
-                   
-         self.ver_ventas()
+                   estatus=(f'No hay entrada numero: {entrada_revisando}')
+         print(estatus)
          opcion=input('desea registrar otra entrada?(S/N): ').upper()
          while opcion.upper() not in ['S', 'N']:
             print('por favor ingrese una respuesta valida')
