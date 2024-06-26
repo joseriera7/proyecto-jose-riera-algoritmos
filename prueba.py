@@ -1,13 +1,36 @@
-def load_general(self,mapas,matriz):
-        cont =0
-        fila =mapas['general'][0]
-        columns = mapas['general'][1]
-                        
-        for i in range(fila):
-            matriz.append([])
-            for j in range(columns):
-                matriz[i].append(f"{cont}")
-                cont+=1
-
-load_general()
+def mostrarAsientosGeneral(self):
+        
+        diccionario = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8 : 'I', 9 : 'J'}
+        
+        total = self.estadio.getCapacidadGeneral()
+        filas = total // 10
+        resto = total % 10
+        for i in range(len(diccionario)):
+            if i == 0:
+                print('  ', end='| ')
+            print(diccionario[i], end='  | ')
+        print('\n')
+        for i in range(filas + 1):
+            if i == filas:
+                print(i +1, end= '| ')
+                for j in range(resto):
+                    if f'{diccionario[j]}{i+1}' not in self.asientos_tomados:
+                        print(0, end='    ')
+                    else: print('X', end='    ')
+                print('\n')
+            elif i < 9:
+                print(i +1, end= ' | ')
+                for j in range(10):
+                    if f'{diccionario[j]}{i+1}' not in self.asientos_tomados:
+                        print(0, end='    ')
+                    else: print('X', end='    ')
+                print('\n')
+            
+            else:
+                print(i +1, end= '| ')
+                for j in range(10):
+                    if f'{diccionario[j]}{i+1}' not in self.asientos_tomados:
+                        print(0, end='    ')
+                    else: print('X', end='    ')
+                print('\n')
 

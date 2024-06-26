@@ -27,14 +27,14 @@ def es_vampiro(num):
         num_str = str(num)
         num_len = len(num_str)
         
-        # Un número vampiro debe tener un número par de dígitos
+
         if num_len % 2 != 0:
             return False
         
-        # Obtener la mitad del número de dígitos
+       
         half_len = num_len // 2
         
-        # Generar todas las combinaciones posibles de la mitad de los dígitos del número
+        
         num_list = list(num_str)
         possible_fangs = set()
         
@@ -53,6 +53,18 @@ def es_vampiro(num):
                 return True
         
         return False
+def es_perfecto(num):
+    suma = []
+    for i in range(1, num):
+        if num % i == 0:
+            suma.append(i)
+    if sum(suma) == num:
+        return True
+    else:
+        return False
+
+
+
 
 class Sistema:
     def __init__(self):
@@ -74,10 +86,10 @@ class Sistema:
     def menu(self):
         print("Bienvenido al sistema de la Euro 2024")
         while True:
-            opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos \n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n7- Salir \n====>')
-            while opcion_menu not in ['1','2','3','4','7']:
+            opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos \n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n7- Salir \n====>')
+            while opcion_menu not in ['1','2','3','4','5','7']:
                 print("Opcion no valida")
-                opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos\n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n7- Salir \n====>')
+                opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos\n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n7- Salir \n====>')
             if opcion_menu == '1':
                 opcion_busqueda = input('De  que forma desea realizar la busqueda?\n1- Buscar partidos por pais\n2- Buscar partidos por estadio\n3- Buscar partidos por fecha\n4- Regresar===>  ')
                 while opcion_busqueda not in ['1','2','3','4']:
@@ -92,12 +104,15 @@ class Sistema:
                 else:
                     pass
             elif opcion_menu=='2':
-                self.registrar_venta()
+                self.registrar_entradas()
             elif opcion_menu=='3':
                  self.ver_productos()
 
             elif opcion_menu=='4':
                  self.chequear_entradas()
+
+            elif opcion_menu=='5':
+                 self.venta_productos()
 
             else: 
                 print('Vuelva pronto!')
@@ -128,13 +143,14 @@ class Sistema:
                         name_prod=product['name']
                         price=product['price']
                         adicional=product['adicional']
+                        stock=product['stock']
                         if adicional in ['plate','package']:
                             tipo='food'
-                            product_obj=Product(name_prod,price,tipo,adicional)
+                            product_obj=Product(name_prod,price,tipo,adicional,stock)
                             product_list.append(product_obj)
                         else:
                             tipo='drink'
-                            product_obj=Product(name_prod,price,tipo,adicional)
+                            product_obj=Product(name_prod,price,tipo,adicional,stock)
                             product_list.append(product_obj)
                     restaurant_obj=Restaurant(name_rest,product_list)
                     lista_restaurants.append(restaurant_obj)
@@ -215,7 +231,7 @@ class Sistema:
         else: 
               return print(f'\nlos partidos que hay el {date} son:\n----------------\n {cadena_partidos}')
         
-    def registrar_venta(self):
+    def registrar_entradas(self):
         nombre_cliente=input('ingrese su nombre: ')
         while not nombre_cliente.isalpha():
             print('por favor ingrese un nombre adecuado (solo su nombre)')
@@ -256,8 +272,10 @@ class Sistema:
              cantidad=input('Cuantas entradas desea?: ')
         
         if tipo.upper() == 'V':
+            tipo='V'
             subtotal=75*int(cantidad)
         else:
+             tipo='G'
              subtotal=35*int(cantidad)
         iva=subtotal*0.16
         total=subtotal+iva
@@ -271,7 +289,7 @@ class Sistema:
              nro_entrada=random.randint(100000,999999)
              while nro_entrada in entradas:
                  nro_entrada=random.randint(100000,999999)
-                 
+
              entradas.append(nro_entrada)
            
 
@@ -299,9 +317,12 @@ class Sistema:
             respuesta=input('¿Desea comprar la entrada? (S/N)\n ===> ')
         if respuesta.upper() == 'S':
             for i in range(len(entradas)):
-                 cliente_obj=Ticket(entradas[i],nombre_cliente+''+apellido_cliente,cedula,edad,partido, False)
+                 cliente_obj=Ticket(entradas[i],f'{nombre_cliente} {apellido_cliente}',cedula,edad,partido, False,tipo)
                  self.ticket_list.append(cliente_obj)
             print('¡Entrada comprada con exito!')
+        else:
+            print('¡Operacion cancelada!')
+
 
         
 
@@ -401,7 +422,7 @@ class Sistema:
          while not entrada_revisando.isdigit() or int(entrada_revisando) not in range(100000,999999):
               print('Por favor ingrese un numero de entrada valido')
               entrada_revisando=input("Por favor ingrese el numero de entrada a chequear: ")
-         estatus=''
+         estatus=(f'No hay entrada numero: {entrada_revisando}')
          for entrada in self.ticket_list:
               if int(entrada_revisando) == entrada.numero:
                 if entrada.chequeado==False:
@@ -423,3 +444,93 @@ class Sistema:
              pass
          else:
              break
+
+    def venta_productos(self):
+        if self.ticket_list==[]:
+                return('No hay entradas registradas')
+        else:
+            carrito=[]
+            print('Bienvenido al sistema de compra de productos')
+            cedula=input('Ingresa tu cedula: ')
+            while not cedula.isdigit() or len(cedula)>8 or len(cedula)<5:
+                print('Por favor ingrese una cedula valida')
+                cedula=input('Ingresa tu cedula: ')
+            for entrada in self.ticket_list:
+                if cedula == entrada.cedula:
+                    if entrada.tipo == 'V':
+                        nombre=entrada.nombre
+                        estadio= entrada.partido.stadium
+                        
+                        print(f'Bienvenido, {nombre} los restaurantes en {estadio.name} son:')#no me esta imprimiendo los estadios bien
+                        for i, restaurantes in enumerate(estadio.restaurants, start=1):
+                            print(f"{i}. {restaurantes.name}")
+                        restaurante_idx = (input("Ingrese el número del restaurante: "))
+                        while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)+1) or restaurante_idx=='0':
+                                print('por favor ingrese un numero valido')
+                                restaurante_idx = (input("Ingrese el número del restaurante: "))
+                        restaurante = estadio.restaurants[int(restaurante_idx) - 1]
+                        for i, product in enumerate(restaurante.products, start=1):
+                                print('---------------------------')
+                                print(f"{i}. {product.show()}")
+                        print('---------------------------')
+                        while True:
+                            producto_idx = (input("Ingrese el número del producto: "))
+                            while not producto_idx.isnumeric() or int(producto_idx) not in range(len(restaurante.products)+1) or producto_idx=='0':
+                                print('por favor ingrese un numero valido')
+                                producto_idx = (input("Ingrese el número del producto: "))
+                            producto = restaurante.products[int(producto_idx) - 1]
+                            if int(entrada.edad)<18:
+                                if producto.adicional == 'alcoholic':
+                                    print('No puedes comprar este producto')
+                                    continue
+                            cantidad = int(input("Ingrese la cantidad del producto: "))
+                            while cantidad > producto.stock:
+                                print(f"No hay suficiente stock del producto {producto.nombre}. Stock disponible: {producto.stock}")
+                                cantidad = int(input("Ingrese la cantidad del producto: "))                           
+                            while cantidad <= 0:
+                                print('por favor ingrese una cantidad valida')
+                                cantidad = int(input("Ingrese la cantidad del producto: "))
+                            carrito.append((producto, cantidad))
+                            print('---------------------------')
+                            print(f"Se ha agregado {cantidad} {producto.nombre} al carrito, desea agregar algo mas?")
+                            respuesta = input("S/N: ").upper()
+                            while respuesta not in ['S', 'N']:
+                                print('por favor ingrese una respuesta valida')
+                                respuesta = input("S/N: ").upper()
+                            if respuesta == 'N':
+                                subtotal=sum(float(producto.precio) * cantidad for producto, cantidad in carrito)
+                                descuento=0
+                                if es_perfecto(int(cedula)):
+                                    subtotal*0.15
+                                
+                                print('---------------------------')
+                                print("Carrito:")
+                                for i, (producto, cantidad) in enumerate(carrito, start=1):
+                                    print(f"{i}. {producto.nombre} x{cantidad}")
+                                print('---------------------------')
+                                print(f"Subtotal: ${subtotal}")
+                                print(f"Descuento: ${descuento}")
+                                print(f"Total: ${subtotal-descuento}")
+                                print('---------------------------')
+                                print("¿Desea realizar la compra?")
+                                respuesta = input("S/N: ").upper()
+                                while respuesta not in ['S', 'N']:
+                                    print('por favor ingrese una respuesta valida')
+                                    respuesta = input("S/N: ").upper()
+                                if respuesta == 'S':
+                                    for producto, cantidad in carrito:
+                                            producto.stock -= cantidad
+                                    print("Gracias por su compra!")
+                                    print('---------------------------')
+                                    return
+                                else:
+                                    print("Gracias por visitarnos")
+                                    return
+                                    
+                            else:pass
+                    else:
+                        print('Necesitas un ticket VIP para comprar productos')
+                        return
+                else:
+                    print(f'No tienes un ticket asociado a tu cedula')
+                    return

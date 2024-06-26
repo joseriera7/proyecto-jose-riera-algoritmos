@@ -19,3 +19,5 @@ class Match:
     
     def show_sinfecha(self):
         return f"{self.home.name} vs {self.away.name} en {self.stadium.name}"
+    def show_estadio(self):
+        return f"{self.stadium}"
