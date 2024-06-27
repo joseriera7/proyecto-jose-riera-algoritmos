@@ -154,7 +154,7 @@ class Sistema:
                             product_list.append(product_obj)
                     restaurant_obj=Restaurant(name_rest,product_list)
                     lista_restaurants.append(restaurant_obj)
-                match_obj=Stadium(stadium['name'],stadium['id'],stadium['city'],stadium['capacity'],lista_restaurants)
+                match_obj=Stadium(stadium['name'],stadium['id'],stadium['city'],stadium['capacity'][0],stadium['capacity'][1],lista_restaurants)
                 self.stadium_list.append(match_obj)
         else:
              print('Error al obtener los estadios')
@@ -171,7 +171,7 @@ class Sistema:
         if response.status_code == 200:
             data=response.json()
             for match in data:
-                for  stadium in self.stadium_list:
+                for stadium in self.stadium_list:
                     if match['stadium_id']== stadium.id:
                         home= Country(match['home']['id'],match['home']['name'],match['home']['code'],match['home']['group'])
                         away= Country(match['away']['id'],match['away']['name'],match['away']['code'],match['away']['group'])
@@ -231,7 +231,95 @@ class Sistema:
         else: 
               return print(f'\nlos partidos que hay el {date} son:\n----------------\n {cadena_partidos}')
         
+    def mostrarAsientosGeneral(self,partido):
+            
+            diccionario = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8 : 'I', 9 : 'J'}
+            total = partido.stadium.getCapacidadGeneral()
+            filas = total // 10
+            resto = total % 10
+            for i in range(len(diccionario)):
+                if i == 0:
+                    print('  ', end='| ')
+                print(diccionario[i], end='  | ')
+            print('\n')
+            for i in range(filas + 1):
+                if i == filas:
+                    print(i +1, end= '| ')
+                    for j in range(resto):
+                        if f'{diccionario[j]}{i+1}' not in partido.taken_g:
+                            print(0, end='    ')
+                        else: print('X', end='    ')
+                    print('\n')
+                elif i < 9:
+                    print(i +1, end= ' | ')
+                    for j in range(10):
+                        if f'{diccionario[j]}{i+1}' not in partido.taken_g:
+                            print(0, end='    ')
+                        else: print('X', end='    ')
+                    print('\n')
+                
+                else:
+                    print(i +1, end= '| ')
+                    for j in range(10):
+                        if f'{diccionario[j]}{i+1}' not in partido.taken_g:
+                            print(0, end='    ')
+                        else: print('X', end='    ')
+                    print('\n')
+    def mostrarAsientosVip(self,partido):
+            
+            diccionario = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8 : 'I', 9 : 'J'}
+            total = partido.stadium.getCapacidadVip()
+            filas = total // 10
+            resto = total % 10
+            for i in range(len(diccionario)):
+                if i == 0:
+                    print('  ', end='| ')
+                print(diccionario[i], end='  | ')
+            print('\n')
+            for i in range(filas + 1):
+                if i == filas:
+                    print(i +1, end= '| ')
+                    for j in range(resto):
+                        if f'{diccionario[j]}{i+1}' not in partido.taken_v:
+                            print(0, end='    ')
+                        else: print('X', end='    ')
+                    print('\n')
+                elif i < 9:
+                    print(i +1, end= ' | ')
+                    for j in range(10):
+                        if f'{diccionario[j]}{i+1}' not in partido.taken_v:
+                            print(0, end='    ')
+                        else: print('X', end='    ')
+                    print('\n')
+                
+                else:
+                    print(i +1, end= '| ')
+                    for j in range(10):
+                        if f'{diccionario[j]}{i+1}' not in partido.taken_v:
+                            print(0, end='    ')
+                        else: print('X', end='    ')
+                    print('\n')
+            
+                    
+            
     def registrar_entradas(self):
+        """
+    Registra una entrada para un partido de fútbol.
+
+    Este método solicita al usuario que ingrese sus datos personales, seleccione un partido
+    y un tipo de entrada (general o VIP), y especifique la cantidad de entradas que desea
+    comprar. Luego, asigna asientos disponibles para cada entrada y muestra un resumen de
+    la compra.
+
+    El método también aplica un descuento del 50% para los clientes con numero de cedula vampiros.
+
+    Parámetros:
+    Ninguno
+
+    Retorna:
+    Ninguno
+    """
+        asientos=[]
         nombre_cliente=input('ingrese su nombre: ')
         while not nombre_cliente.isalpha():
             print('por favor ingrese un nombre adecuado (solo su nombre)')
@@ -291,7 +379,53 @@ class Sistema:
                  nro_entrada=random.randint(100000,999999)
 
              entradas.append(nro_entrada)
-           
+        
+        asientos=[]
+        for entrada in range(1,int(cantidad)+1):
+            if tipo.upper()=='G':
+                print("------------------------")
+                print("Entrada: ",entrada)
+                self.mostrarAsientosGeneral(partido)
+                while True:
+                    asiento_fila=input('En que fila desea comprar?: ')
+                    while not asiento_fila.isnumeric and  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadGeneral()//10)+2):
+                        print('Escoja una fila existente')
+                        asiento_fila=input('En que fila desea comprar?: ')
+                    asiento_columna=input('En que columna desea comprar?: ').upper()
+                    while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
+                        print('Escoja una columna existente')
+                        asiento_columna=input('En que columna desea comprar?: ').upper()
+                    asiento=f'{asiento_columna}{asiento_fila}'
+                    if asiento in partido.taken_g:
+                        print('Este asiento ya esta ocupado')
+                        continue
+                    else:
+                        asientos.append(asiento)
+                        partido.taken_g.append(asiento)
+                        print(f'Asiento {asiento} reservado')
+                        break
+            else:
+                print("------------------------")
+                print("Entrada: ",entrada)
+                self.mostrarAsientosVip(partido)
+                while True:
+                    asiento_fila=input('En que fila desea comprar?: ')
+                    while not asiento_fila.isnumeric and  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadVip()//10)+2):
+                        print('Escoja una fila existente')
+                        asiento_fila=input('En que fila desea comprar?: ')
+                    asiento_columna=input('En que columna desea comprar?: ').upper()
+                    while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
+                        print('Escoja una columna existente')
+                        asiento_columna=input('En que columna desea comprar?: ').upper()
+                    asiento=f'{asiento_columna}{asiento_fila}'
+                    if asiento in partido.taken_v:
+                        print('Este asiento ya esta ocupado')
+                        continue
+                    else:
+                        asientos.append(asiento)
+                        partido.taken_v.append(asiento)
+                        print(f'Asiento {asiento} reservado')
+                        break
 
 
         print(f'''
@@ -304,6 +438,7 @@ class Sistema:
               Partido: {partido.show()}
               Tipo: {tipo}
               entrada(s): {entradas}
+              asiento(s): {asientos}
               ----------------
               Subtotal:${subtotal}
               IVA: ${iva}
@@ -320,7 +455,13 @@ class Sistema:
                  cliente_obj=Ticket(entradas[i],f'{nombre_cliente} {apellido_cliente}',cedula,edad,partido, False,tipo)
                  self.ticket_list.append(cliente_obj)
             print('¡Entrada comprada con exito!')
+
         else:
+            for asiento in asientos:
+                if tipo.upper() == 'V':
+                    self.taken_v.pop(asiento)
+                else:
+                    self.taken_g.pop(asiento)
             print('¡Operacion cancelada!')
 
 
@@ -336,6 +477,28 @@ class Sistema:
     
     
     def ver_productos(self):
+        """
+    Description:
+    Muestra un menú para buscar productos en los restaurantes de un estadio.
+
+    El método primero muestra una lista de estadios disponibles y solicita al usuario
+    que ingrese el número del estadio deseado. Luego, muestra una lista de restaurantes
+    disponibles en ese estadio y solicita al usuario que ingrese el número del restaurante
+    deseado.
+
+    Una vez seleccionado el restaurante, el método proporciona cuatro opciones de búsqueda:
+    buscar productos por nombre, buscar productos por tipo (comida o bebida), buscar productos
+    por rango de precio y regresar al menú anterior.
+
+    Dependiendo de la opción seleccionada, el método solicita al usuario que ingrese
+    la información necesaria para realizar la búsqueda y muestra los resultados
+    correspondientes.
+
+    Parameters:
+    Ninguno
+
+    Returns:
+    Ninguno """
         print('\nEn cual estadio quiere buscar?:')
         for i, estadio in enumerate((self.stadium_list),1):
             print(f"{i}. {estadio.name}")
@@ -400,6 +563,20 @@ class Sistema:
                   print(cadena_productos)
 
     def buscar_prod_pornombre(self):
+        """
+    Busca un producto por nombre en la lista de productos.
+
+    Description:
+    Pide al usuario que ingrese el nombre del producto que desea buscar.
+    Itera sobre la lista de productos y muestra el producto que coincide con el nombre
+    ingresado.
+
+    Parameters:
+    self (object): Instancia de la clase que contiene la lista de productos (products)
+
+    Returns:
+    None
+    """
         nombre=input('Que producto quieres buscar?').strip().title()
         for product in self.products:
             if product.nombre==nombre:
@@ -407,6 +584,18 @@ class Sistema:
                         print('-----------------')
 
     def buscar_prod_portipo(self):
+        """
+    Busca productos por tipo (food o drink) en la lista de productos.
+
+    Description:
+    Pide al usuario que ingrese el tipo de producto que desea buscar (food o drink).
+    Verifica que el tipo ingresado sea válido y luego itera sobre la lista de productos
+    para mostrar los productos que coinciden con el tipo seleccionado.
+
+    Parameters:
+    self (object): Instancia de la clase que contiene la lista de productos (products)
+
+    """
         tipo=input('Que tipo de producto quieres buscar? (food/bebida)').strip().lower()
         while tipo not in ['food', 'bebida']:
             print('por favor ingrese un tipo valido')
@@ -417,6 +606,21 @@ class Sistema:
                         print('-----------------')
 
     def chequear_entradas(self):
+        """
+        Chequea las entradas de un partido y permite registrar nuevas entradas.
+
+        Parameters:
+        self (object): Instancia de la clase que contiene la lista de entradas (ticket_list)
+
+        Description:
+        Pide al usuario que ingrese un número de entrada y verifica si es válido.
+        Si la entrada existe y no ha sido revisada anteriormente, la marca como revisada
+        y muestra un mensaje de bienvenida. Si la entrada ya fue revisada, muestra un
+        mensaje indicando que no puede pasar.
+
+        Continúa pidiendo entradas hasta que el usuario decida salir.
+
+        """
         while True:
          entrada_revisando=input("Por favor ingrese el numero de entrada a chequear: ").strip()
          while not entrada_revisando.isdigit() or int(entrada_revisando) not in range(100000,999999):
@@ -426,8 +630,8 @@ class Sistema:
          for entrada in self.ticket_list:
               if int(entrada_revisando) == entrada.numero:
                 if entrada.chequeado==False:
-                   estatus='Bienvenido a su partido, que disfrute!'
                    entrada.chequeado=True
+                   estatus='Bienvenido a su partido, que disfrute!'
                    break          
                 else:
                      estatus=(f'Ya la entrada {entrada_revisando}  fue revisada, no puede pasar')
@@ -446,6 +650,35 @@ class Sistema:
              break
 
     def venta_productos(self):
+        """Gestiona la venta de productos para usuarios con tickets VIP.
+
+    La función permite a un usuario con un ticket VIP seleccionar un restaurante y productos disponibles en un estadio,
+    agregar productos a su carrito y proceder a la compra. También valida la cédula del usuario, verifica si el usuario es mayor
+    de edad para la compra de productos alcohólicos, y aplica un descuento si la cédula es un número perfecto.
+
+    Si no hay entradas registradas, la función devuelve un mensaje indicando que no hay entradas. Si el usuario no tiene un
+    ticket VIP, o la cédula no está asociada a ninguna entrada, la función devuelve mensajes correspondientes.
+
+    La función realiza las siguientes acciones:
+    1. Solicita la cédula del usuario y la valida.
+    2. Verifica si el usuario tiene un ticket VIP.
+    3. Muestra los restaurantes disponibles en el estadio.
+    4. Permite al usuario seleccionar un restaurante y productos para agregar al carrito.
+    5. Verifica la disponibilidad de stock y la edad del usuario para productos alcohólicos.
+    6. Calcula el subtotal y aplica un descuento si la cédula es un número perfecto.
+    7. Solicita la confirmación de la compra y actualiza el stock si la compra se realiza.
+
+    Devuelve:
+        str: Mensaje indicando el estado del proceso de compra o validación.
+
+    Ejemplo de uso:
+        sistema.venta_productos()
+
+    Notas:
+        - La cédula debe ser un número entero válido entre 5 y 8 dígitos.
+        - Solo usuarios con ticket VIP pueden realizar compras.
+        - Productos alcohólicos no pueden ser comprados por menores de edad.
+        - Se aplica un descuento del 15% si la cédula es un número perfecto."""
         if self.ticket_list==[]:
                 return('No hay entradas registradas')
         else:
@@ -461,7 +694,7 @@ class Sistema:
                         nombre=entrada.nombre
                         estadio= entrada.partido.stadium
                         
-                        print(f'Bienvenido, {nombre} los restaurantes en {estadio.name} son:')#no me esta imprimiendo los estadios bien
+                        print(f'Bienvenido, {nombre} los restaurantes en {estadio.name} son:')
                         for i, restaurantes in enumerate(estadio.restaurants, start=1):
                             print(f"{i}. {restaurantes.name}")
                         restaurante_idx = (input("Ingrese el número del restaurante: "))

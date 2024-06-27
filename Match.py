@@ -10,6 +10,9 @@ class Match:
         self.away = away
         self.date = date
         self.stadium = stadium
+        self.taken_g = []
+        self.taken_v = []
+
 
     def show(self):
         return f"{self.home.name} vs {self.away.name} el {self.date} en {self.stadium.name}"
