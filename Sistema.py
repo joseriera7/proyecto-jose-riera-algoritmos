@@ -8,63 +8,6 @@ from Product import *
 from Ticket import *
 
 
-def generar_permutaciones(arr):
-    # Genera todas las permutaciones posibles de una lista
-        if len(arr) == 0:
-            return []
-        if len(arr) == 1:
-            return [arr]
-        perms = []
-        for i in range(len(arr)):
-            m = arr[i]
-            rem_lista = arr[:i] + arr[i+1:]
-            for p in generar_permutaciones(rem_lista):
-                perms.append([m] + p)
-        return perms
-
-def es_vampiro(num):
-
-        num_str = str(num)
-        num_len = len(num_str)
-        
-
-        if num_len % 2 != 0:
-            return False
-        
-       
-        half_len = num_len // 2
-        
-        
-        num_list = list(num_str)
-        possible_fangs = set()
-        
-        permutaciones = generar_permutaciones(num_list)
-        for perm in permutaciones:
-            fang1 = int("".join(perm[:half_len]))
-            fang2 = int("".join(perm[half_len:]))
-            
-            # Verificar que los factores no terminen ambos en cero
-            if not (str(fang1).endswith('0') and str(fang2).endswith('0')):
-                possible_fangs.add((fang1, fang2))
-        
-        # Verificar si alguno de los pares encontrados es un par de colmillos válido
-        for fang1, fang2 in possible_fangs:
-            if fang1 * fang2 == num:
-                return True
-        
-        return False
-def es_perfecto(num):
-    suma = []
-    for i in range(1, num):
-        if num % i == 0:
-            suma.append(i)
-    if sum(suma) == num:
-        return True
-    else:
-        return False
-
-
-
 
 class Sistema:
     def __init__(self):
@@ -75,6 +18,7 @@ class Sistema:
         self.products=[]
         self.food=[]
         self.drinks=[]
+        self.cedulas={}
 
 
     def register_all(self,url1,url2,url3):
@@ -86,10 +30,10 @@ class Sistema:
     def menu(self):
         print("Bienvenido al sistema de la Euro 2024")
         while True:
-            opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos \n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n6-Gestion de estadisticas \n7- Salir \n====>')
+            opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos \n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n6- Gestion de estadisticas \n7- Salir \n====>')
             while opcion_menu not in ['1','2','3','4','5','6','7']:
                 print("Opcion no valida")
-                opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos\n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n6-Gestion de estadisticas \n7- Salir \n====>')
+                opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos\n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n6- Gestion de estadisticas \n7- Salir \n====>')
             if opcion_menu == '1':
                 opcion_busqueda = input('De  que forma desea realizar la busqueda?\n1- Buscar partidos por pais\n2- Buscar partidos por estadio\n3- Buscar partidos por fecha\n4- Regresar===>  ')
                 while opcion_busqueda not in ['1','2','3','4']:
@@ -115,21 +59,27 @@ class Sistema:
                  self.venta_productos()
 
             elif opcion_menu=='6':
-                opcion_estadistica=input('Que desea hacer? \n1-Ver gasto promedio de clientes \n2-Ver partidos con mas boletos vendidos \n3-Ver tabla de relacion asistencia/venta: ')
-                while opcion_estadistica not in ['1','2','3']:
+                opcion_estadistica=input('Que desea hacer? \n1-Ver gasto promedio de clientes \n2-Ver partidos con mas boletos vendidos \n3-Ver tabla de relacion asistencia/venta \n4-Ver partidos con mayor asistencia \n5-Ver top 3 de clientes con mas boletos \n6-Ver top 3 de productos mas vendidos: ')
+                while opcion_estadistica not in ['1','2','3','4','5','6']:
                     print("Opcion no valida")
-                    opcion_estadistica=input('Que desea hacer? \n1-Ver gasto promedio de clientes \n2 ver partidos con mas boletos vendidos \n3-Ver tabla de relacion asistencia/venta:: ')
+                    opcion_estadistica=input('Que desea hacer? \n1-Ver gasto promedio de clientes \n2 ver partidos con mas boletos vendidos \n3-Ver tabla de relacion asistencia/venta \n4-Ver partidos con mayor asistencia \n5-Ver top 3 de clientes con mas boletos \n6-Ver top 3 de productos mas vendidos: ')
                 if opcion_estadistica=='1':
                     print(self.gasto_promedio())
                 elif opcion_estadistica=='2':
-                    self.boletos_vendidos()
+                    print(self.boletos_vendidos())
                 elif opcion_estadistica=='3':
                     self.tabla()
+                elif opcion_estadistica=='4':
+                    print(self.asistencia())
+                elif opcion_estadistica=='5':
+                    print(self.topclientes())
+                else:
+                    print(self.topproductos())
 
 
             else: 
                 print('Vuelva pronto!')
-                break
+                break 
 
     def registrar_equipos(self,url):
         response=requests.get(url)
@@ -154,17 +104,19 @@ class Sistema:
                     product_list=[]
                     for product in restaurant['products']:
                         name_prod=product['name']
-                        price=product['price']
+                        price=float(product['price'])*1.16
                         adicional=product['adicional']
                         stock=product['stock']
                         if adicional in ['plate','package']:
                             tipo='food'
-                            product_obj=Product(name_prod,price,tipo,adicional,stock)
+                            product_obj=Product(name_prod,round(price,2),tipo,adicional,stock,0)
                             product_list.append(product_obj)
+                            self.products.append(product_obj)
                         else:
                             tipo='drink'
-                            product_obj=Product(name_prod,price,tipo,adicional,stock)
+                            product_obj=Product(name_prod,round(price,2),tipo,adicional,stock,0)
                             product_list.append(product_obj)
+                            self.products.append(product_obj)
                     restaurant_obj=Restaurant(name_rest,product_list)
                     lista_restaurants.append(restaurant_obj)
                 match_obj=Stadium(stadium['name'],stadium['id'],stadium['city'],stadium['capacity'][0],stadium['capacity'][1],lista_restaurants)
@@ -353,131 +305,136 @@ class Sistema:
         while not edad.isdigit() or int(edad) > 80:
             print('por favor ingrese una edad valida')
             edad=input('Ingrese su edad: ')
-        print('Que partido desea comprar: ')
-        for i, match in enumerate(self.match_list):
-            print(f'{i+1}. {match.show()}')
-        partido_idx = input("Ingrese el número del partido: ")
-        while not partido_idx.isdigit() or int(partido_idx) not in range(1, len(self.match_list)+1):
-            print('por favor ingrese un numero de partido valido')
+        if cedula in self.cedulas and self.cedulas[cedula]!=[nombre_cliente,apellido_cliente,edad]:
+                print("los datos del cliente no coinciden")
+        else:
+            print('Que partido desea comprar: ')
+            for i, match in enumerate(self.match_list):
+                print(f'{i+1}. {match.show()}')
             partido_idx = input("Ingrese el número del partido: ")
-        
-        partido_idx = int(partido_idx) - 1
-        partido = self.match_list[partido_idx]
-        tipo=input('Que tipo de entrada quiere, general(G) o vip (V)?')
-        while tipo.upper() not in ['G', 'V']:
-            print('por favor ingrese un tipo de entrada valido')
-            tipo=input('Que tipo de entrada quiere, general - $35 [G] o vip - $75 [V]?')
-        cantidad=input('Cuantas entradas desea?: ')
-        while not cantidad.isdigit() or int(cantidad) < 1:
-             print('por favor ingrese una cantidad valida')
-             cantidad=input('Cuantas entradas desea?: ')
-        
-        if tipo.upper() == 'V':
-            tipo='V'
-            subtotal=75*int(cantidad)
-        else:
-             tipo='G'
-             subtotal=35*int(cantidad)
-        iva=subtotal*0.16
-        total=subtotal+iva
-        descuento=0
-        if es_vampiro(int(cedula)):
-            descuento=total*0.5
-
-        total=subtotal+iva-descuento
-        entradas=[]
-        for entrada in range(1,int(cantidad)+1):
-             nro_entrada=random.randint(100000,999999)
-             while nro_entrada in entradas:
-                 nro_entrada=random.randint(100000,999999)
-
-             entradas.append(nro_entrada)
-        
-        asientos=[]
-        for entrada in range(1,int(cantidad)+1):
-            if tipo.upper()=='G':
-                print("------------------------")
-                print("Entrada: ",entrada)
-                self.mostrarAsientosGeneral(partido)
-                while True:
-                    asiento_fila=input('En que fila desea comprar?: ')
-                    while not asiento_fila.isnumeric and  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadGeneral()//10)+2):
-                        print('Escoja una fila existente')
-                        asiento_fila=input('En que fila desea comprar?: ')
-                    asiento_columna=input('En que columna desea comprar?: ').upper()
-                    while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
-                        print('Escoja una columna existente')
-                        asiento_columna=input('En que columna desea comprar?: ').upper()
-                    asiento=f'{asiento_columna}{asiento_fila}'
-                    if asiento in partido.taken_g:
-                        print('Este asiento ya esta ocupado')
-                        continue
-                    else:
-                        asientos.append(asiento)
-                        partido.taken_g.append(asiento)
-                        print(f'Asiento {asiento} reservado')
-                        break
-            else:
-                print("------------------------")
-                print("Entrada: ",entrada)
-                self.mostrarAsientosVip(partido)
-                while True:
-                    asiento_fila=input('En que fila desea comprar?: ')
-                    while not asiento_fila.isnumeric and  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadVip()//10)+2):
-                        print('Escoja una fila existente')
-                        asiento_fila=input('En que fila desea comprar?: ')
-                    asiento_columna=input('En que columna desea comprar?: ').upper()
-                    while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
-                        print('Escoja una columna existente')
-                        asiento_columna=input('En que columna desea comprar?: ').upper()
-                    asiento=f'{asiento_columna}{asiento_fila}'
-                    if asiento in partido.taken_v:
-                        print('Este asiento ya esta ocupado')
-                        continue
-                    else:
-                        asientos.append(asiento)
-                        partido.taken_v.append(asiento)
-                        print(f'Asiento {asiento} reservado')
-                        break
-
-
-        print(f'''
-              ENTRADA
-              ---------------
-              DATOS DEL CLIENTE
-              Nombre: {nombre_cliente} {apellido_cliente}
-              Cedula: {cedula}
-              ----------------
-              Partido: {partido.show()}
-              Tipo: {tipo}
-              entrada(s): {entradas}
-              asiento(s): {asientos}
-              ----------------
-              Subtotal:${subtotal}
-              IVA: ${iva}
-              Descuento:${descuento} 
-              Total: ${total}''')
-        
-        print('¿Desea comprar la entrada? (S/N)')
-        respuesta=input('===>')
-        while respuesta.upper() not in ['S', 'N']:
-            print('por favor ingrese una respuesta valida')
-            respuesta=input('¿Desea comprar la entrada? (S/N)\n ===> ')
-        if respuesta.upper() == 'S':
-            for i in range(len(entradas)):
-                 cliente_obj=Ticket(entradas[i],f'{nombre_cliente} {apellido_cliente}',cedula,edad,partido, False,tipo,total)
-                 self.ticket_list.append(cliente_obj)
-            print('¡Entrada comprada con exito!')
+            while not partido_idx.isdigit() or int(partido_idx) not in range(1, len(self.match_list)+1):
+                print('por favor ingrese un numero de partido valido')
+                partido_idx = input("Ingrese el número del partido: ")
             
-            partido.boletos_vendidos += int(cantidad)
+            partido_idx = int(partido_idx) - 1
+            partido = self.match_list[partido_idx]
+            tipo=input('Que tipo de entrada quiere, general(G) o vip (V)?')
+            while tipo.upper() not in ['G', 'V']:
+                print('por favor ingrese un tipo de entrada valido')
+                tipo=input('Que tipo de entrada quiere, general - $35 [G] o vip - $75 [V]?')
+            cantidad=input('Cuantas entradas desea?: ')
+            while not cantidad.isdigit() or int(cantidad) < 1:
+                print('por favor ingrese una cantidad valida')
+                cantidad=input('Cuantas entradas desea?: ')
+            
+            if tipo.upper() == 'V':
+                tipo='V'
+                subtotal=75*int(cantidad)
+            else:
+                tipo='G'
+                subtotal=35*int(cantidad)
+            iva=subtotal*0.16
+            total=subtotal+iva
+            descuento=0
+            if es_vampiro(int(cedula)):
+                descuento=total*0.5
 
-        else:
-            for asiento in asientos:
-                if tipo.upper() == 'V':
-                    partido.taken_v.pop(asiento)
+            total=subtotal+iva-descuento
+            entradas=[]
+            for entrada in range(1,int(cantidad)+1):
+                nro_entrada=random.randint(100000,999999)
+                while nro_entrada in entradas:
+                    nro_entrada=random.randint(100000,999999)
+
+                entradas.append(nro_entrada)
+            
+            asientos=[]
+            for entrada in range(1,int(cantidad)+1):
+                if tipo.upper()=='G':
+                    print("------------------------")
+                    print("Entrada: ",entrada)
+                    self.mostrarAsientosGeneral(partido)
+                    while True:
+                        asiento_fila=input('En que fila desea comprar?: ')
+                        while not asiento_fila.isdigit() or  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadGeneral()//10)+2):
+                            print('Escoja una fila existente')
+                            asiento_fila=input('En que fila desea comprar?: ')
+                        asiento_columna=input('En que columna desea comprar?: ').upper()
+                        while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
+                            print('Escoja una columna existente')
+                            asiento_columna=input('En que columna desea comprar?: ').upper()
+                        asiento=f'{asiento_columna}{asiento_fila}'
+                        if asiento in partido.taken_g:
+                            print('Este asiento ya esta ocupado')
+                            continue
+
+                        else:
+                            asientos.append(asiento)
+                            partido.taken_g.append(asiento)
+                            print(f'Asiento {asiento} reservado')
+                            break
                 else:
-                    partido.taken_g.pop(asiento)
-            print('¡Operacion cancelada!')
+                    print("------------------------")
+                    print("Entrada: ",entrada)
+                    self.mostrarAsientosVip(partido)
+                    while True:
+                        asiento_fila=input('En que fila desea comprar?: ')
+                        while not asiento_fila.isnumeric and  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadVip()//10)+2):
+                            print('Escoja una fila existente')
+                            asiento_fila=input('En que fila desea comprar?: ')
+                        asiento_columna=input('En que columna desea comprar?: ').upper()
+                        while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
+                            print('Escoja una columna existente')
+                            asiento_columna=input('En que columna desea comprar?: ').upper()
+                        asiento=f'{asiento_columna}{asiento_fila}'
+                        if asiento in partido.taken_v:
+                            print('Este asiento ya esta ocupado')
+                            continue
+                        else:
+                            asientos.append(asiento)
+                            partido.taken_v.append(asiento)
+                            print(f'Asiento {asiento} reservado')
+                            break
+
+
+            print(f'''
+                ENTRADA
+                ---------------
+                DATOS DEL CLIENTE
+                Nombre: {nombre_cliente} {apellido_cliente}
+                Cedula: {cedula}
+                ----------------
+                Partido: {partido.show()}
+                Tipo: {tipo}
+                entrada(s): {entradas}
+                asiento(s): {asientos}
+                ----------------
+                Subtotal:${subtotal}
+                IVA: ${iva}
+                Descuento:${descuento} 
+                Total: ${total}''')
+            
+            print('¿Desea comprar la entrada? (S/N)')
+            respuesta=input('===>')
+            while respuesta.upper() not in ['S', 'N']:
+                print('por favor ingrese una respuesta valida')
+                respuesta=input('¿Desea comprar la entrada? (S/N)\n ===> ')
+            if respuesta.upper() == 'S':
+                for i in range(len(entradas)):
+                    cliente_obj=Ticket(entradas[i],f'{nombre_cliente} {apellido_cliente}',cedula,edad,partido, False,tipo,total)
+                    self.ticket_list.append(cliente_obj)
+                    self.cedulas[cedula]=[nombre_cliente,apellido_cliente,edad]
+                print('¡Entrada comprada con exito!')
+                
+                partido.boletos_vendidos += int(cantidad)
+
+            else:
+                for asiento in asientos:
+                    if tipo.upper() == 'V':
+                        partido.taken_v.pop(asiento)
+                    else:
+                        partido.taken_g.pop(asiento)
+                print('¡Operacion cancelada!')
 
 
         
@@ -594,9 +551,9 @@ class Sistema:
     """
         nombre=input('Que producto quieres buscar?').strip().title()
         for product in self.products:
-            if nombre in product.nombre:
-                        print(product.show())
-                        print('-----------------')
+            if nombre.lower() in product.nombre.lower():
+                print(product.show())
+                print('-----------------')
 
     def buscar_prod_portipo(self):
         """
@@ -769,7 +726,9 @@ class Sistema:
                                 if respuesta == 'S':
                                     for producto, cantidad in carrito:
                                             producto.stock -= cantidad
-                                            entrada.gasto += total
+                                            producto.vendido+=cantidad
+
+                                    entrada.gasto += total
                                     print("Gracias por su compra!")
                                     print('---------------------------')
                                     return
@@ -800,7 +759,7 @@ class Sistema:
             total_gastos = sum(lista_gastos.values())
             promedio_gastos = total_gastos / len(lista_gastos)
             
-            return f'El gasto promedio fue: {promedio_gastos}'
+            return f'El gasto promedio fue: {promedio_gastos}$'
             
         
     def tabla(self):
@@ -811,6 +770,8 @@ class Sistema:
         el número de personas que asistieron y la relación asistencia/venta. Los partidos se ordenan
         en orden descendente basado en la relación asistencia/venta.
         """
+         # segun la documentacion de python: 
+         # "Las expresiones lambda (a veces denominadas formas lambda) son usadas para crear funciones anónimas. La expresión lambda parameters: expression produce un objeto de función."
         
         partidos_ordenados = sorted(self.match_list, key=lambda x: x.asistencia / x.boletos_vendidos if x.boletos_vendidos else 0, reverse=True)
 
@@ -824,24 +785,117 @@ class Sistema:
 
     def boletos_vendidos(self):
             """
-            Muestra los partidos ordenados por la cantidad de boletos vendidos en orden descendente.
-
             Recorre la lista de partidos (`match_list`), recoge cada partido junto con la boletos_vendidos 
             (cantidad de boletos vendidos), y los almacena en una lista de tuplas. Luego, ordena 
-            esta lista en orden descendente basado en la cantidad de boletos vendidos y muestra 
-            los partidos con su boletos_vendidos.
+            esta lista en orden descendente basado en la cantidad de boletos vendidos y muestra el partido con mas boletos
+            vendidos primero.
             """
             boletos_vendidos = []
-            asistencia=[]
             for partido in self.match_list:
                 boletos_vendidos.append((partido, partido.boletos_vendidos))
-                asistencia.append()
-
             
-            # segun la documentacion de python: 
-            # "Las expresiones lambda (a veces denominadas formas lambda) son usadas para crear funciones anónimas. La expresión lambda parameters: expression produce un objeto de función."
+           
             boletos_vendidos.sort(key=lambda x: x[1], reverse=True)
             
-            print("Partidos con mayor venta de boletos:")
-            for (i,(partido, cantidad)) in enumerate(boletos_vendidos,start=1):
-                print(f"{i}-{partido.show_sinfecha()}: {cantidad} boletos vendidos")
+            for (partido, cantidad) in (boletos_vendidos):
+                return(f"El partido con mas boletos vendidos fue {partido.show_sinfecha()} con {cantidad} boletos")
+    def asistencia(self):
+            """
+
+            Recorre la lista de partidos (`match_list`), recoge cada partido junto con la asistencia,
+            y los almacena en una lista de tuplas. Luego, ordena esta lista en orden descendente basado en la cantidad de asistidores al partido
+            y muestra los partidos con su numero total de asistencia.
+            """
+            asistencia = []
+            for partido in self.match_list:
+                asistencia.append((partido, partido.asistencia))
+            
+           
+            asistencia.sort(key=lambda x: x[1], reverse=True)
+            
+            for (partido, cantidad) in (asistencia):
+                return(f"El partido con mayor asistencia fue {partido.show_sinfecha()} con {cantidad} boletos")
+    def topclientes(self):
+        clientes={}
+        for ticket in self.ticket_list:
+            if ticket.nombre in clientes:
+                clientes[ticket.nombre]+=1
+            else:
+                clientes[ticket.nombre]=1
+        
+        clientes=sorted(clientes.items(), key=lambda x: x[1], reverse=True)
+        top_clientes=''
+        for idx,cliente in enumerate(clientes):
+            top_clientes+=f'\n {idx+1} - {cliente[0]} con {cliente[1]} entradas '
+            if idx==2:
+                break
+        if clientes==[]:
+            return "No hay clientes todavia"
+        else:
+            return f'''Los clientes con mas entradas son: 
+            {top_clientes}'''
+        
+    def topproductos(self):
+        prod_porventas=[]
+        for producto in self.products:
+            nombre=producto.nombre
+            ventas=producto.vendido
+            
+            prod_porventas.append((nombre,ventas))
+
+        productos_ord=sorted(prod_porventas, key=lambda x: x[1], reverse=True)
+        top_productos=''
+        for idx,producto in enumerate(productos_ord):
+            top_productos+=f'\n {idx+1} - {producto[0]} con {producto[1]} articulos vendidos '
+            if idx==2:
+                break
+        return f'''Los productos mas vendidos son: 
+            {top_productos}'''
+
+def generar_permutaciones(arr):
+    # Genera todas las permutaciones posibles de una lista
+        if len(arr) == 0:
+            return []
+        if len(arr) == 1:
+            return [arr]
+        perms = []
+        for i in range(len(arr)):
+            m = arr[i]
+            rem_lista = arr[:i] + arr[i+1:]
+            for p in generar_permutaciones(rem_lista):
+                perms.append([m] + p)
+        return perms
+
+def es_vampiro(num):
+
+        num_str = str(num)
+        num_len = len(num_str)
+        
+        if num_len % 2 != 0:
+            return False
+        
+        half_len = num_len // 2
+        num_list = list(num_str)
+        possible_fangs = set()
+        
+        permutaciones = generar_permutaciones(num_list)
+        for perm in permutaciones:
+            fang1 = int("".join(perm[:half_len]))
+            fang2 = int("".join(perm[half_len:]))
+            
+            # Verificar que los factores no terminen ambos en cero
+            if not (str(fang1).endswith('0') and str(fang2).endswith('0')):
+                possible_fangs.add((fang1, fang2))
+        
+        # Verificar si alguno de los pares encontrados es un par de colmillos válido
+        for fang1, fang2 in possible_fangs:
+            if fang1 * fang2 == num:
+                return True
+        
+        return False
+def es_perfecto(num):
+    suma = []
+    for i in range(1, num):
+        if num % i == 0:
+            suma.append(i)
+    return sum(suma) == num
