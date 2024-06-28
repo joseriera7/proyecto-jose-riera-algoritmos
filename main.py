@@ -7,4 +7,4 @@ url_estadios='https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-pr
 url_partidos='https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/matches.json'
 
 prueba.register_all(url_equipos,url_estadios,url_partidos)
-prueba.menu()
+prueba.menu()1

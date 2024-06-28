@@ -86,10 +86,10 @@ class Sistema:
     def menu(self):
         print("Bienvenido al sistema de la Euro 2024")
         while True:
-            opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos \n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n7- Salir \n====>')
-            while opcion_menu not in ['1','2','3','4','5','7']:
+            opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos \n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n6-Gestion de estadisticas \n7- Salir \n====>')
+            while opcion_menu not in ['1','2','3','4','5','6','7']:
                 print("Opcion no valida")
-                opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos\n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n7- Salir \n====>')
+                opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos\n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n6-Gestion de estadisticas \n7- Salir \n====>')
             if opcion_menu == '1':
                 opcion_busqueda = input('De  que forma desea realizar la busqueda?\n1- Buscar partidos por pais\n2- Buscar partidos por estadio\n3- Buscar partidos por fecha\n4- Regresar===>  ')
                 while opcion_busqueda not in ['1','2','3','4']:
@@ -113,6 +113,19 @@ class Sistema:
 
             elif opcion_menu=='5':
                  self.venta_productos()
+
+            elif opcion_menu=='6':
+                opcion_estadistica=input('Que desea hacer? \n1-Ver gasto promedio de clientes \n2-Ver partidos con mas boletos vendidos \n3-Ver tabla de relacion asistencia/venta: ')
+                while opcion_estadistica not in ['1','2','3']:
+                    print("Opcion no valida")
+                    opcion_estadistica=input('Que desea hacer? \n1-Ver gasto promedio de clientes \n2 ver partidos con mas boletos vendidos \n3-Ver tabla de relacion asistencia/venta:: ')
+                if opcion_estadistica=='1':
+                    print(self.gasto_promedio())
+                elif opcion_estadistica=='2':
+                    self.boletos_vendidos()
+                elif opcion_estadistica=='3':
+                    self.tabla()
+
 
             else: 
                 print('Vuelva pronto!')
@@ -175,7 +188,7 @@ class Sistema:
                     if match['stadium_id']== stadium.id:
                         home= Country(match['home']['id'],match['home']['name'],match['home']['code'],match['home']['group'])
                         away= Country(match['away']['id'],match['away']['name'],match['away']['code'],match['away']['group'])
-                        match_obj=Match(match['id'],match['number'],home,away,match['date'], stadium)
+                        match_obj=Match(match['id'],match['number'],home,away,match['date'], stadium,0,0)
                         
                         self.match_list.append(match_obj)
 
@@ -217,7 +230,7 @@ class Sistema:
 
     def buscar_porfecha(self):
         date=input("Ingresa que dia deseas insertar en 2024-06-__: ").strip()
-        while not date.isdigit or int(date) not in range(0,30):
+        while not date.isdigit or int(date) not in range(0,31):
             print('por favor ingrese un numero valido')
             date=input("Ingresa que dia deseas insertar en 2024-06-__: ").strip()
         date=f'2024-06-{date}'
@@ -344,7 +357,7 @@ class Sistema:
         for i, match in enumerate(self.match_list):
             print(f'{i+1}. {match.show()}')
         partido_idx = input("Ingrese el número del partido: ")
-        while not partido_idx.isdigit() or int(partido_idx) not in range(1, len(self.match_list)):
+        while not partido_idx.isdigit() or int(partido_idx) not in range(1, len(self.match_list)+1):
             print('por favor ingrese un numero de partido valido')
             partido_idx = input("Ingrese el número del partido: ")
         
@@ -452,16 +465,18 @@ class Sistema:
             respuesta=input('¿Desea comprar la entrada? (S/N)\n ===> ')
         if respuesta.upper() == 'S':
             for i in range(len(entradas)):
-                 cliente_obj=Ticket(entradas[i],f'{nombre_cliente} {apellido_cliente}',cedula,edad,partido, False,tipo)
+                 cliente_obj=Ticket(entradas[i],f'{nombre_cliente} {apellido_cliente}',cedula,edad,partido, False,tipo,total)
                  self.ticket_list.append(cliente_obj)
             print('¡Entrada comprada con exito!')
+            
+            partido.boletos_vendidos += int(cantidad)
 
         else:
             for asiento in asientos:
                 if tipo.upper() == 'V':
-                    self.taken_v.pop(asiento)
+                    partido.taken_v.pop(asiento)
                 else:
-                    self.taken_g.pop(asiento)
+                    partido.taken_g.pop(asiento)
             print('¡Operacion cancelada!')
 
 
@@ -579,7 +594,7 @@ class Sistema:
     """
         nombre=input('Que producto quieres buscar?').strip().title()
         for product in self.products:
-            if product.nombre==nombre:
+            if nombre in product.nombre:
                         print(product.show())
                         print('-----------------')
 
@@ -632,6 +647,7 @@ class Sistema:
                 if entrada.chequeado==False:
                    entrada.chequeado=True
                    estatus='Bienvenido a su partido, que disfrute!'
+                   entrada.partido.asistencia+=1
                    break          
                 else:
                      estatus=(f'Ya la entrada {entrada_revisando}  fue revisada, no puede pasar')
@@ -735,7 +751,7 @@ class Sistema:
                                 descuento=0
                                 if es_perfecto(int(cedula)):
                                     subtotal*0.15
-                                
+                                total=subtotal-descuento
                                 print('---------------------------')
                                 print("Carrito:")
                                 for i, (producto, cantidad) in enumerate(carrito, start=1):
@@ -743,7 +759,7 @@ class Sistema:
                                 print('---------------------------')
                                 print(f"Subtotal: ${subtotal}")
                                 print(f"Descuento: ${descuento}")
-                                print(f"Total: ${subtotal-descuento}")
+                                print(f"Total: ${total}")
                                 print('---------------------------')
                                 print("¿Desea realizar la compra?")
                                 respuesta = input("S/N: ").upper()
@@ -753,6 +769,7 @@ class Sistema:
                                 if respuesta == 'S':
                                     for producto, cantidad in carrito:
                                             producto.stock -= cantidad
+                                            entrada.gasto += total
                                     print("Gracias por su compra!")
                                     print('---------------------------')
                                     return
@@ -763,7 +780,68 @@ class Sistema:
                             else:pass
                     else:
                         print('Necesitas un ticket VIP para comprar productos')
-                        return
+                        pass
                 else:
                     print(f'No tienes un ticket asociado a tu cedula')
-                    return
+                    continue
+                
+    def gasto_promedio(self):
+        lista_gastos = {}
+        if self.ticket_list == []:
+            return 'No hay gastos registrados todavía'
+        else:
+            for ticket in self.ticket_list:
+                
+                if ticket.cedula in lista_gastos:
+                    continue
+                else:
+                    lista_gastos[ticket.cedula] = ticket.gasto
+            
+            total_gastos = sum(lista_gastos.values())
+            promedio_gastos = total_gastos / len(lista_gastos)
+            
+            return f'El gasto promedio fue: {promedio_gastos}'
+            
+        
+    def tabla(self):
+        """
+        Muestra una tabla con la asistencia a los partidos de mejor a peor.
+
+        La tabla incluye el nombre del partido, el estadio donde se juega, la cantidad de boletos vendidos,
+        el número de personas que asistieron y la relación asistencia/venta. Los partidos se ordenan
+        en orden descendente basado en la relación asistencia/venta.
+        """
+        
+        partidos_ordenados = sorted(self.match_list, key=lambda x: x.asistencia / x.boletos_vendidos if x.boletos_vendidos else 0, reverse=True)
+
+        
+        print(f"{'Partido':<35} {'Estadio':<30} {'Boletos Vendidos':<20} {'Asistencia':<15} {'Relación Asistencia/Venta':<25}")
+        print("="*135)
+        for partido in partidos_ordenados:
+            equipos=f'{partido.home.name} vs {partido.away.name}'
+            relacion_asistencia_venta = partido.asistencia / partido.boletos_vendidos if partido.boletos_vendidos else 0
+            print(f"{equipos:<35} {partido.stadium.name:<30} {partido.boletos_vendidos:<20} {partido.asistencia:<15} {relacion_asistencia_venta:<25.2f}")
+
+    def boletos_vendidos(self):
+            """
+            Muestra los partidos ordenados por la cantidad de boletos vendidos en orden descendente.
+
+            Recorre la lista de partidos (`match_list`), recoge cada partido junto con la boletos_vendidos 
+            (cantidad de boletos vendidos), y los almacena en una lista de tuplas. Luego, ordena 
+            esta lista en orden descendente basado en la cantidad de boletos vendidos y muestra 
+            los partidos con su boletos_vendidos.
+            """
+            boletos_vendidos = []
+            asistencia=[]
+            for partido in self.match_list:
+                boletos_vendidos.append((partido, partido.boletos_vendidos))
+                asistencia.append()
+
+            
+            # segun la documentacion de python: 
+            # "Las expresiones lambda (a veces denominadas formas lambda) son usadas para crear funciones anónimas. La expresión lambda parameters: expression produce un objeto de función."
+            boletos_vendidos.sort(key=lambda x: x[1], reverse=True)
+            
+            print("Partidos con mayor venta de boletos:")
+            for (i,(partido, cantidad)) in enumerate(boletos_vendidos,start=1):
+                print(f"{i}-{partido.show_sinfecha()}: {cantidad} boletos vendidos")

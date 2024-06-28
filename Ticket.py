@@ -1,5 +1,5 @@
 class Ticket:
-    def __init__(self,numero, nombre, cedula, edad,partido,chequeado,tipo):
+    def __init__(self,numero, nombre, cedula, edad,partido,chequeado,tipo,gasto):
         self.numero = numero
         self.nombre = nombre
         self.cedula = cedula
@@ -7,6 +7,7 @@ class Ticket:
         self.partido = partido
         self.chequeado=chequeado
         self.tipo=tipo
+        self.gasto=gasto
 
     def show(self):
         print(f"Nombre: {self.nombre} Cedula:{self.cedula} Edad:{self.edad} Partido")

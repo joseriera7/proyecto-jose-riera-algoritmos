@@ -3,7 +3,7 @@ from Country import*
 
 
 class Match:
-    def __init__(self,m_id,number,home,away,date,stadium):
+    def __init__(self,m_id,number,home,away,date,stadium,boletos_vendidos,asistencia):
         self.number=number
         self.m_id=m_id
         self.home = home
@@ -12,6 +12,8 @@ class Match:
         self.stadium = stadium
         self.taken_g = []
         self.taken_v = []
+        self.boletos_vendidos=boletos_vendidos
+        self.asistencia=asistencia
 
 
     def show(self):
