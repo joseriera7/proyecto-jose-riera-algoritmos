@@ -9,9 +9,3 @@ class Product:
 
     def show(self):
         return f"Nombre: {self.nombre} \nPrecio: {self.precio}$ \nTipo: {self.tipo}\nAdicional: {self.adicional}"
-
-    def show_bebida(self):
-        return f"Nombre: {self.nombre}\n Precio: {self.precio}$ \n Tipo: {self.tipo}\nAdicional: {self.adicional}"
-    
-    def show_comida(self):
-        return f"Nombre: {self.nombre}\n Precio: {self.precio}$ \n Tipo: {self.tipo}\nAdicional: {self.adicional} "

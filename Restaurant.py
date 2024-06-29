@@ -9,5 +9,5 @@ class Restaurant():
 
     def mostrar_comida(self):
         for product in self.food_list:
-            print(product.show_comida())
+            print(product.show())
 
