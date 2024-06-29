@@ -22,12 +22,35 @@ class Sistema:
 
 
     def register_all(self,url1,url2,url3):
+        """
+    Registra todos los datos necesarios desde las URL proporcionadas.
+
+    Este método registra equipos, estadios y partidos desde las URL proporcionadas.
+
+    Parámetros:
+    url1 (str): La URL para registrar equipos.
+    url2 (str): La URL para registrar estadios.
+    url3 (str): La URL para registrar partidos.
+
+    Retorna:
+    None
+    """
         self.registrar_equipos(url1)
         self.registrar_estadios(url2)
         self.registrar_partidos(url3)
 
 
     def menu(self):
+        """
+    Muestra el menú principal del sistema de la Euro 2024.
+
+    Este método muestra un menú interactivo que permite al usuario realizar diferentes acciones,
+    como buscar partidos, realizar compras de entradas, buscar productos, chequear entradas,
+    comprar productos, gestionar estadísticas y salir del sistema.
+
+    Returns:
+    None
+    """
         print("Bienvenido al sistema de la Euro 2024")
         while True:
             opcion_menu = input('¿Que desea hacer?\n1- Busqueda de partidos \n2- Realizar compra de entradas \n3- Busqueda de productos \n4- Chequear entradas \n5- Comprar productos \n6- Gestion de estadisticas \n7- Salir \n====>')
@@ -82,6 +105,18 @@ class Sistema:
                 break 
 
     def registrar_equipos(self,url):
+        """
+    Registra equipos desde una URL proporcionada.
+
+    Este método hace una solicitud GET a la URL proporcionada, y si la respuesta es exitosa (200),
+    procesa los datos JSON devueltos y crea objetos `Country` para cada equipo, agregándolos a la lista `country_list`.
+
+    Parámetros:
+    url (str): La URL desde la que se obtendrán los datos de los equipos.
+
+    Returns:
+    None
+    """
         response=requests.get(url)
         if response.status_code == 200:
             data=response.json()
@@ -93,6 +128,19 @@ class Sistema:
     
 
     def registrar_estadios(self,url):
+        """
+    Registra estadios y sus respectivos restaurantes y productos desde una URL proporcionada.
+
+    Este método hace una solicitud GET a la URL proporcionada, y si la respuesta es exitosa (200),
+    procesa los datos JSON devueltos y crea objetos `Stadium`, `Restaurant` y `Product` para cada estadio,
+    restaurante y producto, respectivamente, agregándolos a las listas `stadium_list` y `products`.
+
+    Parámetros:
+    url (str): La URL desde la que se obtendrán los datos de los estadios.
+
+    Returns:
+    None
+    """
         response=requests.get(url)
         
         if response.status_code == 200:
@@ -131,6 +179,19 @@ class Sistema:
 
 
     def registrar_partidos(self,url):
+        """
+    Registra partidos desde una URL proporcionada.
+
+    Este método hace una solicitud GET a la URL proporcionada, y si la respuesta es exitosa (200),
+    procesa los datos JSON devueltos y crea objetos `Match` para cada partido, asociándolos con los estadios y países
+    previamente registrados, y agregándolos a la lista `match_list`.
+
+    Parámetros:
+    url (str): La URL desde la que se obtendrán los datos de los partidos.
+
+    Returns:
+    None
+    """
         response=requests.get(url)
         
         if response.status_code == 200:
@@ -149,6 +210,16 @@ class Sistema:
               
 
     def buscar_porpais(self):
+        """
+    Busca partidos por país.
+
+    Pide al usuario que ingrese el nombre de un país, y luego busca en la lista de partidos
+    aquellos en los que participa el equipo de ese país. Si se encuentran partidos, los muestra
+    con detalles; de lo contrario, informa que no se encontraron partidos para ese equipo.
+
+    Returns:
+    None
+    """
         name=input("Ingresa el nombre del pais: ").capitalize().strip()
         while not name.isalpha():
              print('por favor ingrese un nombre adecuado: ')
@@ -162,6 +233,16 @@ class Sistema:
         else: return print(f'\nlos partidos de {name} son:\n----------------\n{cadena_partidos}')
 
     def buscar_porestadio(self):
+        """
+    Busca partidos por estadio.
+
+    Muestra una lista de estadios y pide al usuario que seleccione uno ingresando su número.
+    Luego, busca en la lista de partidos aquellos que se juegan en el estadio seleccionado
+    y los muestra con detalles; de lo contrario, informa que no se encontraron partidos en ese estadio.
+
+    Returns:
+    None
+    """
         print("Seleccione un estadio:")
         for i, estadio in enumerate(self.stadium_list, start=1):
             print(f"{i}. {estadio.name}")
@@ -181,6 +262,17 @@ class Sistema:
         
 
     def buscar_porfecha(self):
+        """
+    Busca partidos por fecha.
+
+    Pide al usuario que ingrese un día del mes (entre 1 y 30) y construye una fecha completa
+    en el formato '2024-06-DD'. Luego, busca en la lista de partidos aquellos que se juegan
+    en esa fecha y los muestra con detalles; de lo contrario, informa que no se encontraron
+    partidos en esa fecha.
+
+    Returns:
+    None
+    """
         date=input("Ingresa que dia deseas insertar en 2024-06-__: ").strip()
         while not date.isdigit or int(date) not in range(0,31):
             print('por favor ingrese un numero valido')
@@ -197,6 +289,20 @@ class Sistema:
               return print(f'\nlos partidos que hay el {date} son:\n----------------\n {cadena_partidos}')
         
     def mostrarAsientosGeneral(self,partido):
+            """
+    Muestra el plano de asientos de la sección general del estadio para un partido dado.
+
+    Utiliza un diccionario para representar las letras de las columnas y un ciclo for anidado
+    para mostrar las filas y columnas de asientos. Si un asiento está ocupado, muestra 'X',
+    de lo contrario, muestra '0'.
+
+    Args:
+    partido: Partido
+        El objeto Partido para el que se mostrará el plano de asientos de la sección general.
+
+    Returns:
+    None
+    """
             
             diccionario = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8 : 'I', 9 : 'J'}
             total = partido.stadium.getCapacidadGeneral()
@@ -231,7 +337,20 @@ class Sistema:
                         else: print('X', end='    ')
                     print('\n')
     def mostrarAsientosVip(self,partido):
-            
+            """
+    Muestra el plano de asientos de la sección VIP del estadio para un partido dado.
+
+    Utiliza un diccionario para representar las letras de las columnas y un ciclo for anidado
+    para mostrar las filas y columnas de asientos. Si un asiento está ocupado, muestra 'X',
+    de lo contrario, muestra '0'.
+
+    Args:
+    partido: Partido
+        El objeto Partido para el que se mostrará el plano de asientos de la sección VIP.
+
+    Returns:
+    None
+    """
             diccionario = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8 : 'I', 9 : 'J'}
             total = partido.stadium.getCapacidadVip()
             filas = total // 10
@@ -745,6 +864,16 @@ class Sistema:
                     continue
                 
     def gasto_promedio(self):
+        """
+    Calcula y devuelve el gasto promedio de los tickets registrados.
+
+    Itera sobre la lista de tickets, agrupa los gastos por cédula y calcula la suma total de gastos.
+    Luego, divide la suma total entre el número de cédulas únicas para obtener el gasto promedio.
+
+    Returns:
+    str
+        Un mensaje que indica el gasto promedio, o un mensaje de error si no hay gastos registrados.
+    """
         lista_gastos = {}
         if self.ticket_list == []:
             return 'No hay gastos registrados todavía'
@@ -816,6 +945,17 @@ class Sistema:
             for (partido, cantidad) in (asistencia):
                 return(f"El partido con mayor asistencia fue {partido.show_sinfecha()} con {cantidad} boletos")
     def topclientes(self):
+        """
+    Devuelve una lista de los top 3 clientes con más entradas compradas.
+
+    Itera sobre la lista de tickets, cuenta la cantidad de entradas compradas por cada cliente
+    y ordena la lista de clientes por la cantidad de entradas en orden descendente.
+    Luego, devuelve un string que muestra los top 3 clientes con más entradas.
+
+    Returns:
+    str
+        Un mensaje que lista los top 3 clientes con más entradas, o un mensaje de error si no hay clientes registrados.
+    """
         clientes={}
         for ticket in self.ticket_list:
             if ticket.nombre in clientes:
@@ -836,6 +976,17 @@ class Sistema:
             {top_clientes}'''
         
     def topproductos(self):
+        """
+    Devuelve una lista de los top 3 productos más vendidos.
+
+    Itera sobre la lista de productos, cuenta la cantidad de artículos vendidos por cada producto
+    y ordena la lista de productos por la cantidad de artículos vendidos en orden descendente.
+    Luego, devuelve un string que muestra los top 3 productos más vendidos.
+
+    Returns:
+    str
+        Un mensaje que lista los top 3 productos más vendidos.
+    """
         prod_porventas=[]
         for producto in self.products:
             nombre=producto.nombre
@@ -853,7 +1004,22 @@ class Sistema:
             {top_productos}'''
 
 def generar_permutaciones(arr):
-    # Genera todas las permutaciones posibles de una lista
+        """
+            Genera todas las permutaciones posibles de una lista de elementos.
+
+            Utiliza un revursividad para generar todas las permutaciones de la lista.
+            Primero, se verifica si la lista está vacía o tiene solo un elemento, en cuyo caso se devuelve una lista vacía o la lista original, respectivamente.
+            Luego, se itera sobre cada elemento de la lista, se elimina temporalmente el elemento de la lista y se generan permutaciones de la lista restante.
+            Finalmente, se devuelve una lista que contiene todas las permutaciones posibles de la lista original.
+
+            Args:
+            arr (list)
+                La lista de elementos para generar permutaciones.
+
+            Returns:
+            list
+                Una lista que contiene todas las permutaciones posibles de la lista original.
+        """
         if len(arr) == 0:
             return []
         if len(arr) == 1:
@@ -867,7 +1033,20 @@ def generar_permutaciones(arr):
         return perms
 
 def es_vampiro(num):
+        """
+            Verifica si un número es un número vampiro.
 
+            Un número vampiro es un número que puede ser expresado como el producto de dos números (llamados "colmillos") que contienen exactamente los mismos dígitos que el número original, pero en un orden diferente.
+            La función genera todas las permutaciones posibles de los dígitos del número y verifica si alguna de ellas forma un par de colmillos válido.
+
+            Args:
+            num (int)
+                El número a verificar si es un número vampiro.
+
+            Returns:
+            bool
+                True si el número es un número vampiro, False en caso contrario.
+            """
         num_str = str(num)
         num_len = len(num_str)
         
@@ -894,6 +1073,21 @@ def es_vampiro(num):
         
         return False
 def es_perfecto(num):
+    """
+    Verifica si un número es perfecto.
+
+    Un número perfecto es un número que es igual a la suma de sus divisores propios (excluyendo al número mismo).
+    La función itera sobre todos los números menores que el número dado y verifica si son divisores del número.
+    Luego, suma todos los divisores encontrados y verifica si la suma es igual al número original.
+
+    Args:
+    num (int)
+        El número a verificar si es perfecto.
+
+    Returns:
+    bool
+        True si el número es perfecto, False en caso contrario.
+    """
     suma = []
     for i in range(1, num):
         if num % i == 0:
