@@ -403,6 +403,9 @@ class Sistema:
     Retorna:
     Ninguno
     """
+        print('Bienvenido a la compra de entradas')
+        print('----------------------------------')
+        diccionario_invert = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 'I': 8, 'J': 9}
         asientos=[]
         nombre_cliente=input('ingrese su nombre: ')
         while not nombre_cliente.isalpha():
@@ -452,7 +455,7 @@ class Sistema:
             else:
                 tipo='G'
                 subtotal=35*int(cantidad)
-            iva=subtotal*0.16
+            iva=round(subtotal*0.16,2)
             total=subtotal+iva
             descuento=0
             if es_vampiro(int(cedula)):
@@ -473,47 +476,65 @@ class Sistema:
                     print("------------------------")
                     print("Entrada: ",entrada)
                     self.mostrarAsientosGeneral(partido)
-                    while True:
+                
+                    asiento_columna=input('En que columna desea comprar?: ').upper().strip()
+                    while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
+                        print('Escoja una columna existente')
+                        asiento_columna=input('En que columna desea comprar?: ').upper().strip()
+                    resto = partido.stadium.capacity_g %  10
+                    asiento_fila=input('En que fila desea comprar?: ')
+                    while not asiento_fila.isdigit() or  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadGeneral()//10)+2):
+                        print('Escoja una fila existente')
                         asiento_fila=input('En que fila desea comprar?: ')
-                        while not asiento_fila.isdigit() or  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadGeneral()//10)+2):
-                            print('Escoja una fila existente')
-                            asiento_fila=input('En que fila desea comprar?: ')
-                        asiento_columna=input('En que columna desea comprar?: ').upper()
-                        while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
-                            print('Escoja una columna existente')
-                            asiento_columna=input('En que columna desea comprar?: ').upper()
-                        asiento=f'{asiento_columna}{asiento_fila}'
-                        if asiento in partido.taken_g:
-                            print('Este asiento ya esta ocupado')
-                            continue
+                    if resto != 0:
+                        while int(asiento_fila) > ((partido.stadium.capacity_g//10) +1) or ((diccionario_invert[asiento_columna] + 1) >  resto  and  int(asiento_fila) == ((partido.stadium.capacity_g//10) +1)):
+                            print('Por favor ingrese un valor válido')
+                            asiento_fila = input('En que fila desea comprar?: ').strip()
+                    else: 
+                        while int(fila) > ((partido.stadium.capacity_g//10)):
+                            print('Por favor ingrese un valor válido')
+                            fila = input('En que fila desea comprar?:').strip()
+                    asiento=f'{asiento_columna}{asiento_fila}'
+                    if asiento in partido.taken_g:
+                        print('Este asiento ya esta ocupado')
+                        continue
 
-                        else:
+                    else:
                             asientos.append(asiento)
                             partido.taken_g.append(asiento)
                             print(f'Asiento {asiento} reservado')
-                            break
+                            
                 else:
                     print("------------------------")
                     print("Entrada: ",entrada)
                     self.mostrarAsientosVip(partido)
-                    while True:
+            
+                    asiento_columna=input('En que columna desea comprar?: ').upper().strip()
+                    while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
+                        print('Escoja una columna existente')
+                        asiento_columna=input('En que columna desea comprar?: ').upper().strip()
+                    resto = partido.stadium.capacity_v %  10
+                    asiento_fila=input('En que fila desea comprar?: ')
+                    while not asiento_fila.isdigit() or  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadVip()//10)+2):
+                        print('Escoja una fila existente')
                         asiento_fila=input('En que fila desea comprar?: ')
-                        while not asiento_fila.isnumeric and  int(asiento_fila) not in range(1,(partido.stadium.getCapacidadVip()//10)+2):
-                            print('Escoja una fila existente')
-                            asiento_fila=input('En que fila desea comprar?: ')
-                        asiento_columna=input('En que columna desea comprar?: ').upper()
-                        while asiento_columna not in ["A","B","C","D","E","F","G","H","I","J"]:
-                            print('Escoja una columna existente')
-                            asiento_columna=input('En que columna desea comprar?: ').upper()
-                        asiento=f'{asiento_columna}{asiento_fila}'
-                        if asiento in partido.taken_v:
-                            print('Este asiento ya esta ocupado')
-                            continue
-                        else:
+                    if resto != 0:
+                        while int(asiento_fila) > ((partido.stadium.capacity_v//10) +1) or ((diccionario_invert[asiento_columna] + 1) >  resto  and  int(asiento_fila) == ((partido.stadium.capacity_v//10) +1)):
+                            print('Por favor ingrese un valor válido')
+                            asiento_fila = input('En que fila desea comprar?: ').strip()
+                    else: 
+                        while int(fila) > ((partido.stadium.capacity_v//10)):
+                            print('Por favor ingrese un valor válido')
+                            fila = input('En que fila desea comprar?:').strip()
+                    asiento=f'{asiento_columna}{asiento_fila}'
+                    if asiento in partido.taken_v:
+                        print('Este asiento ya esta ocupado')
+                        continue
+                    else:
                             asientos.append(asiento)
                             partido.taken_v.append(asiento)
                             print(f'Asiento {asiento} reservado')
-                            break
+                            
 
 
             print(f'''
@@ -740,7 +761,14 @@ class Sistema:
              pass
          else:
              break
-
+         
+    def buscarClienteVIP(self, cedula):
+            tickets_cliente = []
+            for ticket in self.ticket_list:
+                    if ticket.cedula == cedula and ticket.tipo == 'V':
+                        tickets_cliente.append(ticket)
+                        break
+            return tickets_cliente
     def venta_productos(self):
         """Gestiona la venta de productos para usuarios con tickets VIP.
 
@@ -780,88 +808,92 @@ class Sistema:
             while not cedula.isdigit() or len(cedula)>8 or len(cedula)<5:
                 print('Por favor ingrese una cedula valida')
                 cedula=input('Ingresa tu cedula: ')
-            for entrada in self.ticket_list:
-                if cedula == entrada.cedula:
-                    if entrada.tipo == 'V':
-                        nombre=entrada.nombre
-                        estadio= entrada.partido.stadium
-                        
-                        print(f'Bienvenido, {nombre} los restaurantes en {estadio.name} son:')
-                        for i, restaurantes in enumerate(estadio.restaurants, start=1):
-                            print(f"{i}. {restaurantes.name}")
-                        restaurante_idx = (input("Ingrese el número del restaurante: "))
-                        while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)+1) or restaurante_idx=='0':
-                                print('por favor ingrese un numero valido')
-                                restaurante_idx = (input("Ingrese el número del restaurante: "))
-                        restaurante = estadio.restaurants[int(restaurante_idx) - 1]
-                        for i, product in enumerate(restaurante.products, start=1):
-                                print('---------------------------')
-                                print(f"{i}. {product.show()}")
-                        print('---------------------------')
-                        while True:
-                            producto_idx = (input("Ingrese el número del producto: "))
-                            while not producto_idx.isnumeric() or int(producto_idx) not in range(len(restaurante.products)+1) or producto_idx=='0':
-                                print('por favor ingrese un numero valido')
-                                producto_idx = (input("Ingrese el número del producto: "))
-                            producto = restaurante.products[int(producto_idx) - 1]
-                            if int(entrada.edad)<18:
-                                if producto.adicional == 'alcoholic':
-                                    print('No puedes comprar este producto')
-                                    continue
-                            cantidad = int(input("Ingrese la cantidad del producto: "))
-                            while cantidad > producto.stock:
-                                print(f"No hay suficiente stock del producto {producto.nombre}. Stock disponible: {producto.stock}")
-                                cantidad = int(input("Ingrese la cantidad del producto: "))                           
-                            while cantidad <= 0:
-                                print('por favor ingrese una cantidad valida')
-                                cantidad = int(input("Ingrese la cantidad del producto: "))
-                            carrito.append((producto, cantidad))
-                            print('---------------------------')
-                            print(f"Se ha agregado {cantidad} {producto.nombre} al carrito, desea agregar algo mas?")
-                            respuesta = input("S/N: ").upper()
-                            while respuesta not in ['S', 'N']:
-                                print('por favor ingrese una respuesta valida')
-                                respuesta = input("S/N: ").upper()
-                            if respuesta == 'N':
-                                subtotal=sum(float(producto.precio) * cantidad for producto, cantidad in carrito)
-                                descuento=0
-                                if es_perfecto(int(cedula)):
-                                    subtotal*0.15
-                                total=subtotal-descuento
-                                print('---------------------------')
-                                print("Carrito:")
-                                for i, (producto, cantidad) in enumerate(carrito, start=1):
-                                    print(f"{i}. {producto.nombre} x{cantidad}")
-                                print('---------------------------')
-                                print(f"Subtotal: ${subtotal}")
-                                print(f"Descuento: ${descuento}")
-                                print(f"Total: ${total}")
-                                print('---------------------------')
-                                print("¿Desea realizar la compra?")
-                                respuesta = input("S/N: ").upper()
-                                while respuesta not in ['S', 'N']:
-                                    print('por favor ingrese una respuesta valida')
-                                    respuesta = input("S/N: ").upper()
-                                if respuesta == 'S':
-                                    for producto, cantidad in carrito:
-                                            producto.stock -= cantidad
-                                            producto.vendido+=cantidad
+            tickets_cliente = self.buscarClienteVIP(cedula)
+            if tickets_cliente == []: 
+                print(f'No se encontraron tickets VIP para la cedula {cedula}')
+                return
+            else:
+             nombre=tickets_cliente[0].nombre
+             print(f"Bienvenido {nombre}")
+             edad=tickets_cliente[0].edad
+             print('Los partidos en los que tiene tickets son:')
+             for idx, ticket in enumerate(tickets_cliente):
+                print(f'({idx + 1}) {ticket.partido.show_sinfecha()}\n')
+             while True:
+                 tickets_index = input('En que partido se encuentra: ').strip()
+                 if tickets_index.isdigit() and int(tickets_index) <= len(tickets_cliente):
+                     break
+                 print('Por favor ingrese un valor numérico válido')       
+             ticket_seleccionado = tickets_cliente[ int(tickets_index) - 1]
+             estadio=ticket_seleccionado.partido.stadium
+             print(f'Bienvenido, {nombre} los restaurantes en {estadio.name} son:')
+             for i, restaurantes in enumerate(estadio.restaurants, start=1):
+                 print(f"{i}. {restaurantes.name}")
+             restaurante_idx = (input("Ingrese el número del restaurante: "))
+             while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)+1) or restaurante_idx=='0':
+                     print('por favor ingrese un numero valido')
+                     restaurante_idx = (input("Ingrese el número del restaurante: "))
+             restaurante = estadio.restaurants[int(restaurante_idx) - 1]
+             for i, product in enumerate(restaurante.products, start=1):
+                     print('---------------------------')
+                     print(f"{i}. {product.show()}")
+             print('---------------------------')
+             while True:
+                 producto_idx = (input("Ingrese el número del producto: "))
+                 while not producto_idx.isnumeric() or int(producto_idx) not in range(len(restaurante.products)+1) or producto_idx=='0':
+                     print('por favor ingrese un numero valido')
+                     producto_idx = (input("Ingrese el número del producto: "))
+                 producto = restaurante.products[int(producto_idx) - 1]
+                 if int(edad)<18:
+                     if producto.adicional == 'alcoholic':
+                         print('No puedes comprar este producto')
+                         continue
+                 cantidad = int(input("Ingrese la cantidad del producto: "))
+                 while cantidad > producto.stock:
+                     print(f"No hay suficiente stock del producto {producto.nombre}. Stock disponible: {producto.stock}")
+                     cantidad = int(input("Ingrese la cantidad del producto: "))                           
+                 while cantidad <= 0:
+                     print('por favor ingrese una cantidad valida')
+                     cantidad = int(input("Ingrese la cantidad del producto: "))
+                 carrito.append((producto, cantidad))
+                 print('---------------------------')
+                 print(f"Se ha agregado {cantidad} {producto.nombre} al carrito, desea agregar algo mas?")
+                 respuesta = input("S/N: ").upper()
+                 while respuesta not in ['S', 'N']:
+                     print('por favor ingrese una respuesta valida')
+                     respuesta = input("S/N: ").upper()
+                 if respuesta == 'N':
+                     subtotal=sum(float(producto.precio) * cantidad for producto, cantidad in carrito)
+                     descuento=0
+                     if es_perfecto(int(cedula)):
+                         subtotal*0.15
+                     total=subtotal-descuento
+                     print('---------------------------')
+                     print("Carrito:")
+                     for i, (producto, cantidad) in enumerate(carrito, start=1):
+                         print(f"{i}. {producto.nombre} x{cantidad}")
+                     print('---------------------------')
+                     print(f"Subtotal: ${subtotal}")
+                     print(f"Descuento: ${descuento}")
+                     print(f"Total: ${total}")
+                     print('---------------------------')
+                     print("¿Desea realizar la compra?")
+                     respuesta = input("S/N: ").upper()
+                     while respuesta not in ['S', 'N']:
+                         print('por favor ingrese una respuesta valida')
+                         respuesta = input("S/N: ").upper()
+                     if respuesta == 'S':
+                         for producto, cantidad in carrito:
+                                producto.stock -= cantidad
+                                producto.vendido+=cantidad
 
-                                    entrada.gasto += total
-                                    print("Gracias por su compra!")
-                                    print('---------------------------')
-                                    return
-                                else:
-                                    print("Gracias por visitarnos")
-                                    return
-                                    
-                            else:pass
-                    else:
-                        print('Necesitas un ticket VIP para comprar productos')
-                        pass
-                else:
-                    print(f'No tienes un ticket asociado a tu cedula')
-                    continue
+                         ticket_seleccionado.gasto += total
+                         print("Gracias por su compra!")
+                         print('---------------------------')
+                         return
+                     else:
+                         print("Gracias por visitarnos")
+                         return
                 
     def gasto_promedio(self):
         """
