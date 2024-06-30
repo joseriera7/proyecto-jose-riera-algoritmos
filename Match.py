@@ -17,12 +17,36 @@ class Match:
 
 
     def show(self):
+        """
+    Devuelve una representación en cadena del objeto, mostrando sus atributos.
+
+    Returns:
+        str: Una cadena con la información del objeto
+    """
         return f"{self.home.name} vs {self.away.name} el {self.date} en {self.stadium.name}"
     
     def show_sinestadio(self):
+        """
+    Devuelve una representación en cadena del objeto, mostrando sus atributos exceptuando el nombre del estadio.
+
+    Returns:
+        str: Una cadena con la información del objeto
+    """
         return f"{self.home.name} vs {self.away.name} el {self.date}"
     
     def show_sinfecha(self):
+        """
+    Devuelve una representación en cadena del objeto, mostrando sus atributos exceptuando la fecha del partido.
+
+    Returns:
+        str: Una cadena con la información del objeto
+    """
         return f"{self.home.name} vs {self.away.name} en {self.stadium.name}"
     def show_estadio(self):
+        """
+    Devuelve una representación en cadena del objeto, mostrando solo el nombre del estadio
+
+    Returns:
+        str: Una cadena con la información del objeto
+    """
         return f"{self.stadium}"

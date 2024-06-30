@@ -155,14 +155,15 @@ class Sistema:
                         price=float(product['price'])*1.16
                         adicional=product['adicional']
                         stock=product['stock']
+                        ventas=product['quantity']
                         if adicional in ['plate','package']:
                             tipo='food'
-                            product_obj=Product(name_prod,round(price,2),tipo,adicional,stock,0)
+                            product_obj=Product(name_prod,round(price,2),tipo,adicional,stock,int(ventas))
                             product_list.append(product_obj)
                             self.products.append(product_obj)
                         else:
                             tipo='drink'
-                            product_obj=Product(name_prod,round(price,2),tipo,adicional,stock,0)
+                            product_obj=Product(name_prod,round(price,2),tipo,adicional,stock,int(ventas))
                             product_list.append(product_obj)
                             self.products.append(product_obj)
                     restaurant_obj=Restaurant(name_rest,product_list)
@@ -634,11 +635,11 @@ class Sistema:
         if opcion_busqueda == '1':
              cadena_productos=''
              nombre=input('Que producto quieres buscar?').strip().title()
+             print('-----------------')
              for product in restaurante.products:
-                  if product.nombre==nombre:
+                  if nombre.lower() in product.nombre.lower():
                         cadena_productos += f'{product.show()}\n-----------------\n'
              if cadena_productos == '':
-                print('-----------------')
                 print('No se encontraron productos con ese nombre')
                 print('-----------------')
              else:
@@ -1011,7 +1012,7 @@ class Sistema:
         """
     Devuelve una lista de los top 3 productos más vendidos.
 
-    Itera sobre la lista de productos, cuenta la cantidad de artículos vendidos por cada producto
+    Pregunta en cual estadio y en cual restaurante de ese estadio desea buscar, luego itera sobre la lista de productos, cuenta la cantidad de artículos vendidos por cada producto
     y ordena la lista de productos por la cantidad de artículos vendidos en orden descendente.
     Luego, devuelve un string que muestra los top 3 productos más vendidos.
 
@@ -1020,7 +1021,23 @@ class Sistema:
         Un mensaje que lista los top 3 productos más vendidos.
     """
         prod_porventas=[]
-        for producto in self.products:
+        print('\nEn cual estadio quiere buscar?:')
+        for i, estadio in enumerate((self.stadium_list),1):
+            print(f"{i}. {estadio.name}")
+        estadio_idx = (input("Ingrese el número del estadio: "))
+        while not estadio_idx.isnumeric() or int(estadio_idx) not in range(0,len(self.stadium_list)) :
+            print('por favor ingrese un numero valido')
+            estadio_idx = (input("\nIngrese el número del estadio: "))
+        estadio = self.stadium_list[int(estadio_idx) - 1]
+        print('\nEn cual restaurante quiere buscar?:')
+        for i, restaurantes in enumerate(estadio.restaurants, start=1):
+            print(f"{i}. {restaurantes.name}")
+        restaurante_idx = (input("Ingrese el número del restaurante: "))
+        while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)):
+                print('por favor ingrese un numero valido')
+                restaurante_idx = (input("Ingrese el número del restaurante: "))
+        restaurante = estadio.restaurants[int(restaurante_idx) - 1]
+        for producto in restaurante.products:
             nombre=producto.nombre
             ventas=producto.vendido
             
