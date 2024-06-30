@@ -616,7 +616,7 @@ class Sistema:
         for i, estadio in enumerate((self.stadium_list),1):
             print(f"{i}. {estadio.name}")
         estadio_idx = (input("Ingrese el número del estadio: "))
-        while not estadio_idx.isnumeric() or int(estadio_idx) not in range(0,len(self.stadium_list)) :
+        while not estadio_idx.isnumeric() or int(estadio_idx) not in range(0,len(self.stadium_list)+1) :
             print('por favor ingrese un numero valido')
             estadio_idx = (input("\nIngrese el número del estadio: "))
         estadio = self.stadium_list[int(estadio_idx) - 1]
@@ -624,7 +624,7 @@ class Sistema:
         for i, restaurantes in enumerate(estadio.restaurants, start=1):
             print(f"{i}. {restaurantes.name}")
         restaurante_idx = (input("Ingrese el número del restaurante: "))
-        while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)):
+        while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)+1):
                 print('por favor ingrese un numero valido')
                 restaurante_idx = (input("Ingrese el número del restaurante: "))
         restaurante = estadio.restaurants[int(restaurante_idx) - 1]
@@ -1025,7 +1025,7 @@ class Sistema:
         for i, estadio in enumerate((self.stadium_list),1):
             print(f"{i}. {estadio.name}")
         estadio_idx = (input("Ingrese el número del estadio: "))
-        while not estadio_idx.isnumeric() or int(estadio_idx) not in range(0,len(self.stadium_list)) :
+        while not estadio_idx.isnumeric() or int(estadio_idx) not in range(len(self.stadium_list)+1) :
             print('por favor ingrese un numero valido')
             estadio_idx = (input("\nIngrese el número del estadio: "))
         estadio = self.stadium_list[int(estadio_idx) - 1]
@@ -1033,7 +1033,7 @@ class Sistema:
         for i, restaurantes in enumerate(estadio.restaurants, start=1):
             print(f"{i}. {restaurantes.name}")
         restaurante_idx = (input("Ingrese el número del restaurante: "))
-        while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)):
+        while not restaurante_idx.isnumeric() or int(restaurante_idx) not in range(len(estadio.restaurants)+1):
                 print('por favor ingrese un numero valido')
                 restaurante_idx = (input("Ingrese el número del restaurante: "))
         restaurante = estadio.restaurants[int(restaurante_idx) - 1]
